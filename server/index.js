@@ -3,6 +3,7 @@ const express = require('express');
 const volleyball = require('volleyball');
 const bodyParser = require('body-parser');
 const app = express();
+const db = require('./db')
 const port = 3333;
 
 app.use(volleyball);
@@ -12,7 +13,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 app.use(express.static(path.join(__dirname, '../public')));
 
-// app.use('/api', require('./api'));
+app.use('/api', require('./api'));
 
 app.get('*', (req, res, next) => {
     res.sendFile(path.join(__dirname, '../public/index.html'))
@@ -23,8 +24,11 @@ app.use((err, req, res, next) => {
     res.status(err.status || 500).send(err.messager || 'Internal Server Error')
 })
 
-app.listen(port, function() {
-    console.log(`Listening on ${port}`)
+db.sync()
+.then(function() {
+    app.listen(port, function() {
+        console.log(`Listening on ${port}`)
+    })
 })
 
 module.exports = app;
